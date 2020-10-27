@@ -26,6 +26,9 @@ if (~exist('anomaly_score', 'var'))
     anomaly_score = adaptiveWeights(M_2D, h, w, R, C);
 end
 
-%
+% Locate anomalies
 %--------------------------------------------------------------------------
+avg_as = mean(anomaly_score(~isnan(anomaly_score)));
+std_as = std(anomaly_score(~isnan(anomaly_score)));
 
+anomaly_idx = find(anomaly_score > avg_as + 3*std_as);

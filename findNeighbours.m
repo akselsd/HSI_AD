@@ -1,22 +1,23 @@
-function NN = findNeighbours(idx, w, M, win_i)
+function NN = findNeighbours(idx, h, M, win_i)
     
-    i_tl = idx - (floor(win_i/2) + 1)*(w + 1); % top left corner of window
-    i_tr = idx - (floor(win_i/2) + 1)*(w - 1); % top right corner
+    i_tl = idx - ceil(win_i/2)*(h + 1); % top left corner of window
+    i_tr = idx + ceil(win_i/2)*(h - 1); % top right corner
     
-    i_bl = idx + (floor(win_i/2) + 1)*(w - 1); % bottom left corner
-    i_br = idx + (floor(win_i/2) + 1)*(w + 1); % bottom right corner
+    i_bl = idx - ceil(win_i/2)*(h - 1); % bottom left corner
+    i_br = idx + ceil(win_i/2)*(h + 1); % bottom right corner
     
-    n1 = M(i_tl:i_tr, :);
-    n2 = M(i_bl:i_br, :);
+    n1 = M(i_tl:i_bl, :);
     
-    i_tl = i_tl + w;
-    i_tr = i_tr + w;
+    n2 = M(i_tr:i_br, :);
     
-    i_bl = i_bl - w;
-    i_br = i_br - w;
+    i_tl = i_tl + h;
+    i_tr = i_tr - h;
     
-    n3 = M(i_tl:w:i_bl, :);
-    n4 = M(i_tr:w:i_br, :);
+    i_bl = i_bl + h;
+    i_br = i_br - h;
     
+    n3 = M(i_tl:h:i_tr, :);
+    n4 = M(i_bl:h:i_br, :);
+   
     NN = [n1; n2; n3; n4];
 end
