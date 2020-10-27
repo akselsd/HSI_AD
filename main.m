@@ -1,4 +1,4 @@
-loadData = 0;
+loadData = 1;
 
 if (loadData )
     clear, clc, close all;
