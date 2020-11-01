@@ -1,7 +1,7 @@
-function rmse  = calcRmse_new( DBN, HSI )
+function rmse  = calcRmse_new( DBN, X )
  
- HSI_hat  = v2h_dbn( DBN, HSI );
- err  = power( HSI - HSI_hat, 2 );
+ Y    = v2h_dbn( DBN, X );
+ err  = power( X - Y, 2 );
  rmse = sqrt( sum(err(:)) / numel(err) );
  
 end

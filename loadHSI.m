@@ -10,5 +10,9 @@ function [M_2D, h, w, N_band] = loadHSI()
     M_3D             = hyperNormalize(double(X)); 
     [h, w, N_band]   = size(M_3D);
     M_2D             = hyperConvert2d(M_3D)';
+    
+    goodBands = [4:104 116:135 137:149 174:220];
+    N_band    = length(goodBands);
+    M_2D      = M_2D(:, goodBands);
 end
 

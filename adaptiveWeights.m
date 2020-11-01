@@ -1,5 +1,5 @@
-function anomaly_score = adaptiveWeights(M, h, w, R, C)
-    win   = 7;                   %Length of one side of inner quadrat window in pixels
+function anomaly_score = adaptiveWeights(h, w, R, C)
+    win   = 3;                   %Length of one side of inner quadrat window in pixels
     N_n   = (win + 2)^2 - win^2; % Nr of neighbours
 
     wt            = zeros(1, N_n); 
@@ -11,8 +11,8 @@ function anomaly_score = adaptiveWeights(M, h, w, R, C)
         for row = outer_sq:h-outer_sq
 
             idx = (col - 1)*h + row;
-            Rn  = findNeighbours(idx, w, R, win); %Reconstruction error neighbours
-            Cn  = findNeighbours(idx, w, C, win); %codelayer neighbours
+            Rn  = findNeighbours(idx, h, R, win); %Reconstruction error neighbours
+            Cn  = findNeighbours(idx, h, C, win); %codelayer neighbours
 
             % find weights
             wt  = 1./Rn';

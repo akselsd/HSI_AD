@@ -1,13 +1,13 @@
-function dbn = trainDBN_new( dbn, IN, OUT, opts)
+function DBN = trainDBN_new( DBN, IN, OUT, opts)
 
-    N_rbm    = numel( dbn.rbm );
+    N_rbm    = numel( DBN.rbm );
     num      = size(IN,1);
-    deltaDbn = dbn;
+    deltaDbn = DBN;
 
 
     for n=1:N_rbm
-        deltaDbn.rbm{n}.W = zeros(size(dbn.rbm{n}.W));
-        deltaDbn.rbm{n}.b = zeros(size(dbn.rbm{n}.b));
+        deltaDbn.rbm{n}.W = zeros(size(DBN.rbm{n}.W));
+        deltaDbn.rbm{n}.b = zeros(size(DBN.rbm{n}.b));
     end
 
 
@@ -24,8 +24,7 @@ function dbn = trainDBN_new( dbn, IN, OUT, opts)
         for batch = 1 : opts.BatchSize:num
 
             bind      = ind(batch:min([batch + opts.BatchSize - 1, num]));
-            trainDBN  = dbn;
-            Hall      = v2hall_new( trainDBN, IN(bind,:) ); 
+            Hall      = v2hall_new( DBN, IN(bind,:) ); 
 
             for n = N_rbm:-1:1
 
@@ -34,7 +33,7 @@ function dbn = trainDBN_new( dbn, IN, OUT, opts)
                 if( n+1 > N_rbm )
                     der = ( Hall{N_rbm} - OUT(bind,:) );
                 else
-                    der = derSgm .* ( der * trainDBN.rbm{n+1}.W' );
+                    der = derSgm .* ( der * DBN.rbm{n+1}.W' );
                 end
 
 
@@ -58,14 +57,14 @@ function dbn = trainDBN_new( dbn, IN, OUT, opts)
 
             % Update W and B
             for n = 1 : N_rbm            
-                dbn.rbm{n}.W = dbn.rbm{n}.W + deltaDbn.rbm{n}.W;
-                dbn.rbm{n}.b = dbn.rbm{n}.b + deltaDbn.rbm{n}.b;  
+                DBN.rbm{n}.W = DBN.rbm{n}.W + deltaDbn.rbm{n}.W;
+                DBN.rbm{n}.b = DBN.rbm{n}.b + deltaDbn.rbm{n}.b;  
             end
 
         end
         
         if( opts.Verbose )
-            rmse = calcRmse_new( dbn, IN );
+            rmse = calcRmse_new( DBN, IN );
             fprintf('%3d : %9.4f \n', iter, rmse );          
         end
     end

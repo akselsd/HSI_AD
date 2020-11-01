@@ -1,7 +1,7 @@
 function DBN = HSI_TRAIN_DBN(M_2D, Nodes, N_pix)
 
-    opts.MaxIter             = 50;
-    opts.BatchSize           = N_pix/4;
+    opts.MaxIter             = 200;
+    opts.BatchSize           = 5000;
     opts.Verbose             = 1;
     opts.StepRatio           = 0.1;
     opts.DropOutRate         = 0;
