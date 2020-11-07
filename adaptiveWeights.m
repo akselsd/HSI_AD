@@ -5,10 +5,10 @@ function anomaly_score = adaptiveWeights(h, w, R, C)
     wt            = zeros(1, N_n); 
     Pf            = 0;                %penalty factor (Recommended set to 0)
     outer_sq      = (ceil(win/2) + 1);
-    anomaly_score = nan(1, w*h);
+    anomaly_score = zeros(1, w*h);
 
     for col = outer_sq:w-outer_sq
-        for row = outer_sq:h-outer_sq
+        for row = outer_sq : (h-outer_sq)
 
             idx = (col - 1)*h + row;
             Rn  = findNeighbours(idx, h, R, win); %Reconstruction error neighbours
@@ -16,7 +16,11 @@ function anomaly_score = adaptiveWeights(h, w, R, C)
 
             % find weights
             wt  = 1./Rn';
-            wt(abs(wt - mean(wt)) > std(wt)) = Pf*wt(abs(wt - mean(wt)) > std(wt));
+            wt(abs(Rn' - mean(Rn)) > 4*std(Rn)) = Pf*wt(abs(Rn' - mean(Rn)) > 4*std(Rn));
+            
+            if (R(idx) > 3)
+                idx
+            end
 
             % calc anomaly score
             dist               = sum((sqrt((Cn - C(idx, :)).^2)), 2);

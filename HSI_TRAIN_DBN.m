@@ -1,7 +1,7 @@
 function DBN = HSI_TRAIN_DBN(M_2D, Nodes, N_pix)
 
-    opts.MaxIter             = 200;
-    opts.BatchSize           = 5000;
+    opts.MaxIter             = 50;
+    opts.BatchSize           = 50;
     opts.Verbose             = 1;
     opts.StepRatio           = 0.1;
     opts.DropOutRate         = 0;
@@ -13,6 +13,9 @@ function DBN = HSI_TRAIN_DBN(M_2D, Nodes, N_pix)
     % Deep Belief Network
     DBN   = initDBN( Nodes );
     DBN   = pretrainDBN_new(DBN, M_2D, opts);
-    DBN   = SetLinearMapping_new(DBN, M_2D, M_2D);
+    %DBN   = SetLinearMapping_new(DBN, M_2D, M_2D);
+    
+    opts.StepRatio           = 0.05;
+    opts.MaxIter             = 100;
     DBN   = trainDBN_new(DBN, M_2D, M_2D, opts);
 end
