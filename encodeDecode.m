@@ -1,13 +1,13 @@
-function [C, R, Y] = encodeDecode(DBN, X, N_hid, N_pix, N_band)
+function HSI = encodeDecode(DBN, HSI)
     
-    C = zeros(N_pix, N_hid);
-    Y = zeros(N_pix, N_band);
-    R = zeros(N_pix, 1);
+    HSI.C = zeros(HSI.N_pix, DBN.N_hid);
+    HSI.Y = zeros(HSI.N_pix, HSI.N_band);
+    HSI.R = zeros(HSI.N_pix, 1);
     
-    for i = 1:N_pix
-        C(i, :)  = sigmoid( X(i, :) * DBN.rbm{1}.W + DBN.rbm{1}.b );
-        Y(i, :)  = sigmoid( C(i, :) * DBN.rbm{2}.W + DBN.rbm{2}.b );
-        R(i)     = sqrt(sum((X(i, :) - Y(i, :)).^2));
+    for i = 1:HSI.N_pix
+        HSI.C(i, :)  = sigmoid( HSI.M_2D(i, :) * DBN.dbn.rbm{1}.W + DBN.dbn.rbm{1}.b );
+        HSI.Y(i, :)  = sigmoid( HSI.C(i, :) * DBN.dbn.rbm{2}.W + DBN.dbn.rbm{2}.b );
+        HSI.R(i)     = sqrt(sum((HSI.M_2D(i, :) - HSI.Y(i, :)).^2));
     end
     
 end
