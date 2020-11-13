@@ -34,6 +34,7 @@ function rbm = pretrainRBM_new(rbm, V, opts )
 
             % Gibbs sampling step 1
             bhid0 = double( rand(size(hid0)) < hid0 );
+            %bhid0 = hid0;
 
             vis1  = sigmoid(  bhid0 * rbm.W' + rbm.c ); % Compute visible nodes
             hid1  = sigmoid(  vis1 * rbm.W + rbm.b  );  % Compute hidden nodes
@@ -45,6 +46,11 @@ function rbm = pretrainRBM_new(rbm, V, opts )
             dW = (posprods - negprods)';
             dB = (sum(hid0, 1) - sum(hid1, 1));
             dC = (sum(vis0, 1) - sum(vis1, 1));
+            
+            if( opts.gaus )
+                dW = bsxfun(@rdivide, dW, rbm.sig');
+                dC = bsxfun(@rdivide, dC, rbm.sig .* rbm.sig);
+            end
 
             deltaW = momentum * deltaW + (opts.StepRatio / N_bands) * dW;
             deltaB = momentum * deltaB + (opts.StepRatio / N_bands) * dB;

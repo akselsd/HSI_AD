@@ -1,5 +1,5 @@
 figure()
-subplot(2,2,1)
+subplot(3,2,1)
 imagesc(HSI.an_map)
 title('Reference anomaly map')
 axis image;
