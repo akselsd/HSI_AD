@@ -1,5 +1,4 @@
 function DBN = HSI_TRAIN_DBN(HSI, N_hid)
-    opts.gaus                = 0;
     opts.MaxIter             = 50;
     opts.BatchSize           = 20;
     opts.Verbose             = 1;

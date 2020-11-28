@@ -46,10 +46,6 @@ function DBN = trainDBN_new( DBN, IN, OUT, opts)
                 deltaWb = in' * der / numel(bind);
                 deltab  = deltaWb(1,:);
                 deltaW  = deltaWb(2:end,:);
-                
-                if( opts.gaus )
-                    deltaW = bsxfun( @rdivide, deltaW, DBN.rbm{n}.sig' );
-                end
 
                 deltaDbn.rbm{n}.W = momentum * deltaDbn.rbm{n}.W;
                 deltaDbn.rbm{n}.b = momentum * deltaDbn.rbm{n}.b;    
@@ -69,7 +65,7 @@ function DBN = trainDBN_new( DBN, IN, OUT, opts)
         
         if( opts.Verbose )
             rmse = calcRmse_new( DBN, IN );
-            fprintf('%3d : %9.4f \n', iter, rmse );          
+            fprintf( '%3d : %9.4f \n', iter, rmse);          
         end
     end
 end

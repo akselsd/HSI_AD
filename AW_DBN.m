@@ -2,11 +2,11 @@ clear
 % Load in a HSI
 %--------------------------------------------------------------------------
 if (~exist('HSI', 'var'))
-    %clear, close all, clc;
+    clear, close all, clc;
     doPlot = 1;
-    optsHSI.dataset        = 'indian_pines';      % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
-    optsHSI.N_an           = 10;          % Nr of fake Anomalies to add to HSI
-    optsHSI.maxAnomalySize = 4;           % Maximum size of synthetic anomalies (length of one side of a quadrant)
+    optsHSI.dataset        = 'indian_pines';    % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
+    optsHSI.N_an           = 1;          % Nr of fake Anomalies to add to HSI
+    optsHSI.maxAnomalySize = 6;           % Maximum size of synthetic anomalies (length of one side of a quadrant)
     
     HSI        = loadHSI(optsHSI);
 end
@@ -30,9 +30,11 @@ window_size   = 9;   %Length of one side of inner quadrat window in pixels
 anomaly_score = adaptiveWeights(HSI, DBN, window_size);
 
 
+
 % Plot results
 %--------------------------------------------------------------------------
 if (doPlot)
     plotResults;
+    auc = plotAUC (anomaly_score, HSI.an_map);
 end
 
