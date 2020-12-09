@@ -19,7 +19,7 @@ function anomaly_score = adaptiveWeights(HSI, DBN, win)
 
             % calc anomaly score
             dist               = sum((sqrt((Cn - HSI.C(idx, :)).^2)), 2);
-            anomaly_score(idx) = (1/N_n)*(wt*dist);
+            anomaly_score(idx) = (1/length(dist(dist > 0)))*(wt*dist);
 
         end
     end

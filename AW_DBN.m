@@ -1,12 +1,12 @@
+
 clear
 % Load in a HSI
 %--------------------------------------------------------------------------
 if (~exist('HSI', 'var'))
-    clear, close all, clc;
     doPlot = 1;
-    optsHSI.dataset        = 'indian_pines';    % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
+    optsHSI.dataset        = 'air3';    % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
     optsHSI.N_an           = 10;          % Nr of fake Anomalies to add to HSI
-    optsHSI.maxAnomalySize = 8;           % Maximum size of synthetic anomalies (length of one side of a quadrant)
+    optsHSI.maxAnomalySize = 12;           % Maximum size of synthetic anomalies (length of one side of a quadrant)
     
     HSI        = loadHSI(optsHSI);
 end
@@ -26,12 +26,30 @@ end
 
 % Calculate the anomaly score of the HSI
 %--------------------------------------------------------------------------
-window_size   = 9;   %Length of one side of inner quadrat window in pixels
-HSI.anomaly_score = adaptiveWeights(HSI, DBN, window_size);
+% Check best window size
+win_sizes = 1:2:31;
+auc_win = zeros(length(win_sizes), 1);
+
+for k = 1:length(win_sizes)
+    HSI.anomaly_score = adaptiveWeights(HSI, DBN, win_sizes(k));
+    [auc_win(k), ~, ~] = calcAUC(HSI.anomaly_score(HSI.anomaly_score > 0), ...
+    HSI.an_map(HSI.anomaly_score > 0), 1000);
+end
+
+[M,I] = max(auc_win);
+HSI.anomaly_score = adaptiveWeights(HSI, DBN, win_sizes(I));
+
+% AUC
+%--------------------------------------------------------------------------
+[auc, fpr, tpr] = calcAUC(HSI.R(HSI.anomaly_score > 0), HSI.an_map(HSI.anomaly_score > 0), 1000);
+[auc_AW, fpr_AW, tpr_AW] = calcAUC(HSI.anomaly_score(HSI.anomaly_score > 0), ...
+    HSI.an_map(HSI.anomaly_score > 0), 1000);
 
 % Plot results
 %--------------------------------------------------------------------------
 if (doPlot)
     plotResults;
 end
+
+
 
