@@ -4,9 +4,9 @@ clear
 %--------------------------------------------------------------------------
 if (~exist('HSI', 'var'))
     doPlot = 1;
-    optsHSI.dataset        = 'air3';    % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
-    optsHSI.N_an           = 10;          % Nr of fake Anomalies to add to HSI
-    optsHSI.maxAnomalySize = 12;           % Maximum size of synthetic anomalies (length of one side of a quadrant)
+    optsHSI.dataset        = 'beach2';    % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
+    optsHSI.N_an           = 15;          % Nr of fake Anomalies to add to HSI
+    optsHSI.maxAnomalySize = 8;           % Maximum size of synthetic anomalies (length of one side of a quadrant)
     
     HSI        = loadHSI(optsHSI);
 end
@@ -27,7 +27,7 @@ end
 % Calculate the anomaly score of the HSI
 %--------------------------------------------------------------------------
 % Check best window size
-win_sizes = 1:2:31;
+win_sizes = 1:2:21;
 auc_win = zeros(length(win_sizes), 1);
 
 for k = 1:length(win_sizes)

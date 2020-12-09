@@ -36,9 +36,9 @@ function rbm = pretrainRBM_new(rbm, V, opts )
             dB = (sum(hid0, 1) - sum(hid1, 1));
             dC = (sum(vis0, 1) - sum(vis1, 1));
 
-            deltaW = momentum * deltaW + (opts.StepRatio / N_pix) * dW;
-            deltaB = momentum * deltaB + (opts.StepRatio / N_pix) * dB;
-            deltaC = momentum * deltaC + (opts.StepRatio / N_pix) * dC;
+%             deltaW = momentum * deltaW + (opts.StepRatio / N_pix) * dW;
+%             deltaB = momentum * deltaB + (opts.StepRatio / N_pix) * dB;
+%             deltaC = momentum * deltaC + (opts.StepRatio / N_pix) * dC;
 
             deltaW = momentum * deltaW + (opts.StepRatio / opts.BatchSize) * dW;
             deltaB = momentum * deltaB + (opts.StepRatio / opts.BatchSize) * dB;
