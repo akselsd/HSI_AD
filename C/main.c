@@ -1,68 +1,32 @@
-#include "functions.h"
+#include "read_hsi.h"
+#include "params.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "platform.h"
-#include "xil_printf.h"
-#include "xparameters.h"
-#include "xtime_l.h"
-#include "xil_io.h"
-#include "xsdps.h"		/* SD device driver */
-#include "xil_cache.h"
-#include "xplatform_info.h"
-#include "ff.h"
-#include "math.h"
-#include "det_parameters.h"
+#include <stdint.h>
+#include <errno.h>
+#include <string.h>
+#include <assert.h>
 
-/*****************************************************************************/
 
 int main()
 {
+	printf("==Starting HAD test==\n");
+	size_t spatial_height = HEIGHT;
+	size_t spatial_width = WIDTH;
+	size_t spectral_bands = BANDS;
 
-	init_platform();
+	HSI* hsi = read_hsi(DATA, spatial_width, spatial_height, spectral_bands);
+	
+	if (!hsi)
+    {
+        printf("Failed to read hsi\n");
+        return -1;
+    }
 
-	//TIMER
-	XTime tStart, tEnd;
+	print_hsi(hsi);
 
-	int detected = 0;
-
-
-	printf("Started...\n");
-	//Start timer
-	XTime_GetTime(&tStart);
-
-	//IMPORT HYPERSPECTRAL CUBE TO DDR
-	read_data(HyperMatrixFile, HyperData);
-
-	//IMPORT HYPERSPECTRAL Target TO DDR
-	read_data(TargetFile, target);
-
-#ifdef ALG1
-	detected = adaptive_cosine_estimator();
-#endif
-
-#ifdef ALG2
-	detected = constrained_energy_minimization();
-#endif
-
-#ifdef ALG3
-	detected = spectral_angle_mapper();
-#endif
-
-	write_data(ResultsFile, result);
-
-	//Stop timer
-	XTime_GetTime(&tEnd);
-
-	//from system timer
-	printf("t =%15.5lf sec\n", (long double)((tEnd - tStart) * 2) / (long double)XPAR_PS7_CORTEXA9_0_CPU_CLK_FREQ_HZ);
-	printf("Output took %llu clock cycles.\n", 2 * (tEnd - tStart));
-	printf("Output took %.2f us.\n", 1.0 * (tEnd - tStart) / (COUNTS_PER_SECOND / 1000000));
-
-#ifdef DEBUG
-	printf("We had %d detected target pixels which is %f percent. \n",
-	       detected, 100 * (double)detected / (double)N_pixels);
-#endif
-
-	cleanup_platform();
+	free_hsi(hsi);
+	
+	printf("==Ending HAD test==\n");
 	return 0;
 }
