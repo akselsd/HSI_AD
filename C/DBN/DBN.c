@@ -128,7 +128,7 @@ end
 
 
 int* randPerm(int max){
-    int perm[max];
+    int* perm = malloc(max*sizeof(int));
     for (int i = 0; i < max; i++) perm[i] = i;
 
     // Random permutation the order

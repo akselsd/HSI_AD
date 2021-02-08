@@ -6,13 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct
-{
-    size_t width;
-    size_t height;
-    size_t bands;
-    uint16_t* buf;
-} HSI;
 
 size_t get_file_size(const char* filename);
 HSI* read_hsi(const char* filename, size_t width, size_t height, size_t bands);

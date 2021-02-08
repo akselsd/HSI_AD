@@ -2,6 +2,7 @@
 #define DBN_inc
 
 #include "params.h"
+#include "matrix_functions.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,14 +23,14 @@ typedef struct
 
 typedef struct
 {
-    float weights[BANDS][MID_LAYER];
+    float weights[BANDS * MID_LAYER];
     float bias_a[MID_LAYER];
     float bias_b[BANDS];
 } RBM_one;
 
 typedef struct
 {
-    float weights[MID_LAYER][BANDS];
+    float weights[MID_LAYER * BANDS];
     float bias_b[MID_LAYER];
     float bias_a[BANDS];
 } RBM_two;
