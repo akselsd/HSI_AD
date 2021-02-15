@@ -8,7 +8,28 @@
 #include <math.h>
 
 
-matrix_float* blank_matrix_float(size_t width, size_t height){
+void print_mat(const matrix_float* mat)
+{
+    size_t n = mat->height * mat->width;
+    printf("Height: %i \n ", mat->height);
+    printf("Width: %i \n ", mat->width);
+    for (size_t j = 0; j < n; j++)
+    {
+        printf("%f \n ", mat->buf[j]);
+    }
+}
+
+float mat_get(matrix_float* mat, int h_idx, int w_idx)
+{
+    if (mat->transpose)
+    {
+        return mat->buf[w_idx*mat->width + h_idx];
+    }
+    return mat->buf[h_idx*mat->width + w_idx];
+}
+
+matrix_float* blank_matrix_float(size_t width, size_t height)
+{
     matrix_float* mat = malloc(sizeof(matrix_float));
 
     if (!mat)
@@ -20,6 +41,7 @@ matrix_float* blank_matrix_float(size_t width, size_t height){
     mat->height = height;
     mat->width = width;
     mat->buf = calloc(height * width, sizeof(float));
+    mat->transpose = 0;
     return mat;
 }
 
@@ -30,19 +52,24 @@ void free_matrix_float(matrix_float* f)
 }
 
 
-matrix_float* mat_mult(matrix_float* first, matrix_float* second, matrix_float* result){
+matrix_float* mat_mult(matrix_float* first, matrix_float* second, matrix_float* result)
+{
     printf("==mat_mult==\n");
 
+    /*
     if (!((result->height == first->height) && (result->width == second->width))){
+        printf("%u %u \n ", first->height, first->width);
+        printf("%u %u \n ", second->height, first->width);
+        printf("%u %u \n ", result->height, first->width);
         printf("==Wrong matrix dimensions==\n");
         return NULL;
     }
-
+    */
     for (int i = 0; i < result->height; i++){
         for (int j = 0; j < result->width; j++){
             printf("%i \n ", (i*result->width + j));
             for (int k = 0; k < first->width; k++){
-                //result->buf[i*result->width + j] += first->buf[i*first->width + k] * second->buf[k*second->width + j];
+                result->buf[i*result->width + j] += mat_get(first, i, k) * mat_get(second, k, j);
             }
         }
     }
@@ -50,7 +77,8 @@ matrix_float* mat_mult(matrix_float* first, matrix_float* second, matrix_float* 
 }
 
 
-matrix_float* mat_add(matrix_float* first, matrix_float* second, matrix_float* result){
+matrix_float* mat_add(matrix_float* first, matrix_float* second, matrix_float* result)
+{
     printf("==mat_add==\n");
 
     if (!((result->height == first->height) && (result->width == second->width))){
@@ -65,11 +93,16 @@ matrix_float* mat_add(matrix_float* first, matrix_float* second, matrix_float* r
     return result;
 }
 
-matrix_float* sigmoid(matrix_float* in, matrix_float* result){
+matrix_float* sigmoid(matrix_float* in, matrix_float* result)
+{
+    printf("==sigmoid==\n");
+    print_mat(in);
     for (int i = 0; i < result->height; i++){
         for (int j = 0; j < result->width; j++){
-            result->buf[i*result->height + j] = 1/(1 + expf(-in->buf[i*result->height + j]));
+            result->buf[i*result->width + j] = 1/(1 + expf(- mat_get(in, i, j)));
         }
     }
+    print_mat(result);
     return result;
 }
+

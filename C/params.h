@@ -19,6 +19,7 @@ typedef struct
 {
     size_t width;
     size_t height;
+    int transpose;
     float* buf;
 } matrix_float;
 

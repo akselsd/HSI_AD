@@ -17,9 +17,9 @@ int main()
 	size_t spectral_bands = BANDS;
 	size_t N_pixels = HEIGHT * WIDTH;
 
+	/*
 	HSI* hsi = read_hsi(DATA, spatial_width, spatial_height, spectral_bands);
 	HSI* tmp = blank_hsi(spatial_width, spatial_height, spectral_bands);
-
 	
 	if (!hsi)
     {
@@ -27,13 +27,31 @@ int main()
         return -1;
     }
 
-	//print_hsi(hsi);
+	print_hsi(hsi);
+	*/
 
-	tmp->two_dim_matrix = mat_mult(hsi->two_dim_matrix, hsi->two_dim_matrix, tmp->two_dim_matrix);
-	print_hsi(tmp);
+	int h1 = 6;
+	int w2 = 3;
 
-	free_hsi(hsi);
-	free_hsi(tmp);
+	matrix_float* a = blank_matrix_float(2, h1);
+	matrix_float* b = blank_matrix_float(2, w2);
+	matrix_float* b2 = blank_matrix_float(2, w2);
+	matrix_float* c = blank_matrix_float(w2, h1);
+
+	for (size_t i = 0; i < 12; i++)
+	{
+		if (i < 6)
+		{
+			b->buf[i] = (float)(i + 1);
+		}
+		a->buf[i] = (float)(i + 1);
+	}
+
+	b2 = sigmoid(b, b2);
+
+	free_matrix_float(a);
+	free_matrix_float(b);
+	free_matrix_float(c);
 	
 	printf("==Ending HAD test==\n");
 	return 0;
@@ -41,5 +59,5 @@ int main()
 
 // 1. open "developer command prompt for VS 2019"
 // 2. cd to C-folder
-// 3. run "cl main.c read_hsi.c"
+// 3. run "cl main.c read_hsi.c matrix_functions.c && main"
 // 4. run "main"
