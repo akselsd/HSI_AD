@@ -23,23 +23,16 @@ typedef struct
 
 typedef struct
 {
-    float weights[BANDS * MID_LAYER];
-    float bias_a[MID_LAYER];
-    float bias_b[BANDS];
-} RBM_one;
-
-typedef struct
-{
-    float weights[MID_LAYER * BANDS];
-    float bias_b[MID_LAYER];
-    float bias_a[BANDS];
-} RBM_two;
+    matrix_float* weights;
+    matrix_float* bias_a;
+    matrix_float* bias_b;
+} RBM;
 
 
 typedef struct
 {
-    RBM_one rbm1;
-    RBM_two rbm2;
+    RBM* rbm1;
+    RBM* rbm2;
 } DBN;
 
 DBN* initDBN(void);
