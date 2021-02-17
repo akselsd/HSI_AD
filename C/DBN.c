@@ -84,9 +84,7 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
 
         for( int j = 0 ; j < (hsi->pixels - con->BatchSize); j + con->BatchSize )
         {
-            start = j * hsi->bands;
-            end   = (j + con->BatchSize) * hsi->bands - 1;
-            V_tmp = mat_cpy(start, end, hsi->two_dim_matrix, V_tmp);
+            V_tmp = mat_cpy_batch(j, hsi, V_tmp);
 
             H1 = mat_mult(V_tmp, dbn->rbm1->weights, H1);
             H1 = mat_add(H1, dbn->rbm1->bias_h, H1);
@@ -101,11 +99,14 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
 }
 
 
-matrix_float* mat_cpy(int start_i, int end_i, matrix_float* mat_old, matrix_float* mat_new)
+matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* mat_new, int* ind)
 {
-    for (size_t i = start_i; i < end_i; i++)
+    for (size_t i = start_i; i < (start_i + batchSize); i++)
     {
-        mat_new->buf[i - start_i] = mat_old->buf[i];
+        for (size_t j = 0; j < hsi->bands; i++)
+        {
+            hsi->two_dim_matrix ->buf[i - start_i] = mat_old->buf[i];
+        }
     }
     return mat_new;
 }

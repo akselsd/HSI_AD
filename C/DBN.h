@@ -23,14 +23,18 @@ typedef struct
 
 typedef struct
 {
+    size_t visual;
+    size_t hidden;
     matrix_float* weights;
-    matrix_float* bias_a;
-    matrix_float* bias_b;
+    matrix_float* bias_v;
+    matrix_float* bias_h;
 } RBM;
 
 
 typedef struct
 {
+    size_t bands_n;
+    size_t mid_layer_size;
     RBM* rbm1;
     RBM* rbm2;
 } DBN;
