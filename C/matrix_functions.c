@@ -11,8 +11,6 @@
 void print_mat(const matrix_float* mat)
 {
     size_t n = mat->height * mat->width;
-    printf("Height: %i \n ", mat->height);
-    printf("Width: %i \n ", mat->width);
     for (size_t j = 0; j < n; j++)
     {
         printf("%f \n ", mat->buf[j]);
@@ -67,7 +65,6 @@ matrix_float* mat_mult(matrix_float* first, matrix_float* second, matrix_float* 
     */
     for (int i = 0; i < result->height; i++){
         for (int j = 0; j < result->width; j++){
-            printf("%i \n ", (i*result->width + j));
             for (int k = 0; k < first->width; k++){
                 result->buf[i*result->width + j] += mat_get(first, i, k) * mat_get(second, k, j);
             }
@@ -88,6 +85,38 @@ matrix_float* mat_add(matrix_float* first, matrix_float* second, matrix_float* r
 
     for (int i = 0; i < (result->height * result->width); i++){
         result->buf[i] = first->buf[i] + second->buf[i];
+        printf("%i \n ", i);
+    }
+    return result;
+}
+
+matrix_float* mat_div_scalar(matrix_float* in, float scalar, matrix_float* result)
+{
+    printf("==mat_add==\n");
+
+    if (!((result->height == first->height) && (result->width == second->width))){
+        printf("==Wrong matrix dimensions==\n");
+        return NULL;
+    }
+
+    for (int i = 0; i < (result->height * result->width); i++){
+        result->buf[i] = first->buf[i] + second->buf[i];
+        printf("%i \n ", i);
+    }
+    return result;
+}
+
+matrix_float* mat_sub(matrix_float* first, matrix_float* second, matrix_float* result)
+{
+    printf("==mat_add==\n");
+
+    if (!((result->height == first->height) && (result->width == second->width))){
+        printf("==Wrong matrix dimensions==\n");
+        return NULL;
+    }
+
+    for (int i = 0; i < (result->height * result->width); i++){
+        result->buf[i] = first->buf[i] - second->buf[i];
         printf("%i \n ", i);
     }
     return result;

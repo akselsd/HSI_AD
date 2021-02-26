@@ -66,7 +66,10 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
     DBN* delta = initDBN(dbn->bands_n, dbn->mid_layer_size, 1);
     matrix_float* H1 = blank_matrix_float(dbn->mid_layer_size, con->BatchSize);
     matrix_float* H2 = blank_matrix_float(dbn->bands_n, con->BatchSize);
+    matrix_float* der1 = blank_matrix_float(dbn->bands_n, con->BatchSize);
     matrix_float* V_tmp = blank_matrix_float(dbn->bands_n, con->BatchSize);
+    matrix_float* in1 = blank_matrix_float(dbn->mid_layer_size + 1, con->BatchSize);
+    matrix_float* deltaWB1 = blank_matrix_float(dbn->bands_n, dbn->mid_layer_size + 1);
     float moment;
     int start;
     int end;
@@ -84,7 +87,7 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
 
         for( int j = 0 ; j < (hsi->pixels - con->BatchSize); j + con->BatchSize )
         {
-            V_tmp = mat_cpy_batch(j, hsi, V_tmp);
+            V_tmp = mat_cpy_batch(j, con->BatchSize, hsi, V_tmp, ind);
 
             H1 = mat_mult(V_tmp, dbn->rbm1->weights, H1);
             H1 = mat_add(H1, dbn->rbm1->bias_h, H1);
@@ -93,6 +96,17 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
             H2 = mat_mult(H1, dbn->rbm2->weights, H2);
             H2 = mat_add(H2, dbn->rbm2->bias_h, H2);
             H2 = sigmoid(H2, H2);
+
+            der1 = mat_sub(H2, V_tmp, der1);
+
+            in1  = mat_cat(con->BatchSize, H1, in1);
+            in1->transpose = 1;
+
+            deltaWB1 = mat_mult(in1, der1, deltaWB1);
+            deltaWB1
+
+
+
         }
     }
 
@@ -105,7 +119,7 @@ matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* 
     {
         for (size_t j = 0; j < hsi->bands; i++)
         {
-            hsi->two_dim_matrix ->buf[i - start_i] = mat_old->buf[i];
+            mat_new->buf[(i - start_i)*hsi->bands + j] = hsi->two_dim_matrix->buf[ind[i]*hsi->bands + j];
         }
     }
     return mat_new;
@@ -128,4 +142,21 @@ int* randPerm(int max){
 
 
 
+matrix_float* mat_cat(int batchSize, matrix_float* old, matrix_float* new)
+{
+    for (size_t i = 0; i < new->height; i++)
+    {
+        for (size_t j = 0; j < new->width; j++)
+        {
+            if (j == 0){
+                new->buf[i*new->width + j] = 1;
+            }else{
+                new->buf[i*new->width + j] = old->buf[i*new->width + j - 1];
+            }
+        }
+        
+    }
+    return new;
+    
+}
 
