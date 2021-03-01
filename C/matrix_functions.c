@@ -94,13 +94,19 @@ matrix_float* mat_div_scalar(matrix_float* in, float scalar, matrix_float* resul
 {
     printf("==mat_add==\n");
 
-    if (!((result->height == first->height) && (result->width == second->width))){
-        printf("==Wrong matrix dimensions==\n");
-        return NULL;
+    for (int i = 0; i < (result->height * result->width); i++){
+        result->buf[i] = in->buf[i] / scalar;
+        printf("%i \n ", i);
     }
+    return result;
+}
+
+matrix_float* mat_mul_scalar(matrix_float* in, float scalar, matrix_float* result)
+{
+    printf("==mat_add==\n");
 
     for (int i = 0; i < (result->height * result->width); i++){
-        result->buf[i] = first->buf[i] + second->buf[i];
+        result->buf[i] = in->buf[i] * scalar;
         printf("%i \n ", i);
     }
     return result;

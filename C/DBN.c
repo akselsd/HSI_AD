@@ -70,6 +70,9 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
     matrix_float* V_tmp = blank_matrix_float(dbn->bands_n, con->BatchSize);
     matrix_float* in1 = blank_matrix_float(dbn->mid_layer_size + 1, con->BatchSize);
     matrix_float* deltaWB1 = blank_matrix_float(dbn->bands_n, dbn->mid_layer_size + 1);
+    matrix_float* deltaW1 = blank_matrix_float(dbn->bands_n, dbn->mid_layer_size);
+    matrix_float* deltaB1 = blank_matrix_float(dbn->bands_n, 1);
+    matrix_float* der2 = blank_matrix_float(con->BatchSize, dbn->mid_layer_size);
     float moment;
     int start;
     int end;
@@ -103,8 +106,26 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
             in1->transpose = 1;
 
             deltaWB1 = mat_mult(in1, der1, deltaWB1);
-            deltaWB1
+            deltaWB1 = mat_div_scalar(deltaWB1, con->BatchSize, deltaWB1);
 
+            for (int i = 0; i < (deltaWB1->height * deltaWB1->width); i++){
+                if (i < con->BatchSize){
+                    deltaB1->buf[i] = con->StepRatio * deltaWB1->buf[i];
+                }else{
+                    deltaW1->buf[i - con->BatchSize] = con->StepRatio * deltaWB1->buf[i];
+                }
+            }
+
+            delta->rbm2->weights = mat_mul_scalar(delta->rbm2->weights, moment, delta->rbm2->weights);
+            delta->rbm2->bias_h = mat_mul_scalar(delta->rbm2->bias_h, moment, delta->rbm2->bias_h);
+            
+            delta->rbm2->weights = mat_sub(delta->rbm2->weights, deltaW1, delta->rbm2->weights);
+            delta->rbm2->bias_h = mat_sub(delta->rbm2->bias_h, deltaB1, delta->rbm2->bias_h);
+
+            
+            for (int i = 0; i < (derSgm->height * derSgm->width); i++){
+                derSgm->buf[i] = H1->buf[i] * (1 - H1->buf[i]);
+            }
 
 
         }
