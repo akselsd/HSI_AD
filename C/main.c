@@ -30,29 +30,29 @@ int main()
 
 	print_hsi(hsi);
 	*/
+	matrix_float* a = blank_matrix_float(2, 4);
+	matrix_float* b = blank_matrix_float(4, 2);
+	matrix_float* c = blank_matrix_float(2, 2);
+	matrix_float* d = blank_matrix_float(2, 4);
 
-	int h1 = 6;
-	int w2 = 3;
-
-	matrix_float* a = blank_matrix_float(2, h1);
-	matrix_float* b = blank_matrix_float(2, w2);
-	matrix_float* c = blank_matrix_float(w2, h1);
-
-	for (size_t i = 0; i < 12; i++)
+	for (size_t i = 0; i < 8; i++)
 	{
-		if (i < 6)
-		{
-			b->buf[i] = (float)(i + 1);
-		}
-		a->buf[i] = (float)(i + 1);
+		b->buf[i] = i;
+		a->buf[i] = i;
 	}
-
-	b = sigmoid(b, b);
+	print_mat(b);
+	transpose(b);
+	print_mat(b);
+	d = mat_div_scalar(b, 4, d);
+	print_mat(d);
+	
 
 	free_matrix_float(a);
 	free_matrix_float(b);
 	free_matrix_float(c);
+	free_matrix_float(d);
 	
+
 	printf("==Ending HAD test==\n");
 	return 0;
 }

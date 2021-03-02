@@ -62,6 +62,70 @@ DBN* initDBN(size_t bands_n, size_t mid_layer_size, int zeros)
 }
 
 
+void print_rmse(DBN* dbn, HSI* hsi){
+    matrix_float* H1       = blank_matrix_float(dbn->mid_layer_size, hsi->pixels);
+    matrix_float* H2       = blank_matrix_float(dbn->bands_n, hsi->pixels);
+
+    H1 = mat_mult(hsi->two_dim_matrix, dbn->rbm1->weights, H1);
+    H1 = mat_add(H1, dbn->rbm1->bias_h, H1);
+    H1 = sigmoid(H1, H1);
+
+    H2 = mat_mult(H1, dbn->rbm2->weights, H2);
+    H2 = mat_add(H2, dbn->rbm2->bias_h, H2);
+    H2 = sigmoid(H2, H2);
+
+    
+}
+
+
+matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* mat_new, int* ind)
+{
+    for (size_t i = start_i; i < (start_i + batchSize); i++)
+    {
+        for (size_t j = 0; j < hsi->bands; i++)
+        {
+            mat_new->buf[(i - start_i)*hsi->bands + j] = hsi->two_dim_matrix->buf[ind[i]*hsi->bands + j];
+        }
+    }
+    return mat_new;
+}
+
+
+int* randPerm(int max){
+    int* perm = malloc(max*sizeof(int));
+    for (int i = 0; i < max; i++) perm[i] = i;
+
+    // Random permutation the order
+    for (int i = 0; i < max; i++) {
+	    int j, t;
+	    j = rand() % (max-i) + i;
+	    t = perm[j]; perm[j] = perm[i]; perm[i] = t; // Swap i and j
+    }
+    return perm;
+}
+
+
+
+
+matrix_float* mat_cat(int batchSize, matrix_float* old, matrix_float* new)
+{
+    for (size_t i = 0; i < new->height; i++)
+    {
+        for (size_t j = 0; j < new->width; j++)
+        {
+            if (j == 0){
+                new->buf[i*new->width + j] = 1;
+            }else{
+                new->buf[i*new->width + j] = old->buf[i*new->width + j - 1];
+            }
+        }
+        
+    }
+    return new;
+    
+}
+
+
 DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
     DBN* delta = initDBN(dbn->bands_n, dbn->mid_layer_size, 1);
 
@@ -163,66 +227,5 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
 }
 
 
-void print_rmse(DBN* dbn, HSI* hsi){
-    matrix_float* H1       = blank_matrix_float(dbn->mid_layer_size, hsi->pixels);
-    matrix_float* H2       = blank_matrix_float(dbn->bands_n, hsi->pixels);
 
-    H1 = mat_mult(hsi->two_dim_matrix, dbn->rbm1->weights, H1);
-    H1 = mat_add(H1, dbn->rbm1->bias_h, H1);
-    H1 = sigmoid(H1, H1);
-
-    H2 = mat_mult(H1, dbn->rbm2->weights, H2);
-    H2 = mat_add(H2, dbn->rbm2->bias_h, H2);
-    H2 = sigmoid(H2, H2);
-
-    
-}
-
-
-matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* mat_new, int* ind)
-{
-    for (size_t i = start_i; i < (start_i + batchSize); i++)
-    {
-        for (size_t j = 0; j < hsi->bands; i++)
-        {
-            mat_new->buf[(i - start_i)*hsi->bands + j] = hsi->two_dim_matrix->buf[ind[i]*hsi->bands + j];
-        }
-    }
-    return mat_new;
-}
-
-
-int* randPerm(int max){
-    int* perm = malloc(max*sizeof(int));
-    for (int i = 0; i < max; i++) perm[i] = i;
-
-    // Random permutation the order
-    for (int i = 0; i < max; i++) {
-	    int j, t;
-	    j = rand() % (max-i) + i;
-	    t = perm[j]; perm[j] = perm[i]; perm[i] = t; // Swap i and j
-    }
-    return perm;
-}
-
-
-
-
-matrix_float* mat_cat(int batchSize, matrix_float* old, matrix_float* new)
-{
-    for (size_t i = 0; i < new->height; i++)
-    {
-        for (size_t j = 0; j < new->width; j++)
-        {
-            if (j == 0){
-                new->buf[i*new->width + j] = 1;
-            }else{
-                new->buf[i*new->width + j] = old->buf[i*new->width + j - 1];
-            }
-        }
-        
-    }
-    return new;
-    
-}
 
