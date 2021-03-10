@@ -1,11 +1,10 @@
 %clear, close all, clc
 
-
 % Load in a HSI
 %--------------------------------------------------------------------------
 if (~exist('HSI', 'var'))
     doPlot = 1;
-    optsHSI.dataset        = 'urban4';    % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
+    optsHSI.dataset        = 'beach3';    % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
     optsHSI.N_an           = 15;          % Nr of fake Anomalies to add to HSI
     optsHSI.maxAnomalySize = 8;           % Maximum size of synthetic anomalies (length of one side of a quadrant)
     HSI                    = loadHSI(optsHSI);
@@ -26,36 +25,34 @@ if (~exist('R', 'var'))
     HSI = encodeDecode(DBN, HSI);
 end
 
-
 % Calculate the anomaly score of the HSI
 %--------------------------------------------------------------------------
 if (~exist('win_size', 'var'))
-    plot_win_auc = 1;
+    plot_win_auc = 0;
     win_size = findBestWindowSize(HSI, DBN, plot_win_auc); % Find best window size
 end
 
 
 % Calculate the anomaly score of the HSI
 %--------------------------------------------------------------------------
-HSI.anomaly_score = adaptiveWeights_test(HSI, DBN, win_size);
+HSI.anomaly_score = adaptiveWeights_test(HSI, DBN, win_sizes(I));
 
 
 % AUC
 %--------------------------------------------------------------------------
-[auc, fpr, tpr] = ...
-    calcAUC(HSI.R(HSI.anomaly_score > 0), HSI.an_map(HSI.anomaly_score > 0), 1000);
-[auc_AW, fpr_AW, tpr_AW] = ...
-    calcAUC(HSI.anomaly_score(HSI.anomaly_score > 0), HSI.an_map(HSI.anomaly_score > 0), 1000);
+[auc, fpr, tpr]          = calcAUC(HSI.R(HSI.anomaly_score > 0), ...
+    HSI.an_map(HSI.anomaly_score > 0), 1000);
+[auc_AW, fpr_AW, tpr_AW] = calcAUC(...
+    HSI.anomaly_score(HSI.anomaly_score > 0), HSI.an_map(HSI.anomaly_score > 0), 1000);
 
 
 % Change from grayscale to absolute detection maps
 %--------------------------------------------------------------------------
-if (1)
-    thresh = 4;
+if (0)
+    thresh = 7;
     HSI.anomaly_score(HSI.anomaly_score < thresh) = 0;
     HSI.anomaly_score(HSI.anomaly_score > thresh) = 1;
 end
-
 
 % Plot results
 %--------------------------------------------------------------------------

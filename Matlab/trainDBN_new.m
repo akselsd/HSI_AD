@@ -30,6 +30,8 @@ function DBN = trainDBN_new( DBN, IN, OUT, opts)
 
                 derSgm = Hall{n} .* ( 1 - Hall{n} );
 
+                
+                
                 if( n+1 > N_rbm )
                     der = ( Hall{N_rbm} - OUT(bind,:) );
                 else
