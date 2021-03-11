@@ -5,9 +5,9 @@
 %--------------------------------------------------------------------------
 if (~exist('HSI', 'var'))
     doPlot = 1;
-    optsHSI.dataset        = 'urban4';    % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
-    optsHSI.N_an           = 15;          % Nr of fake Anomalies to add to HSI
-    optsHSI.maxAnomalySize = 8;           % Maximum size of synthetic anomalies (length of one side of a quadrant)
+    optsHSI.dataset        = 'urban2';                                     % indian_pines, salinas, KSC, air(1-4), beach(1-4), urban(1-4)
+    optsHSI.N_an           = 15;                                           % Nr of fake Anomalies to add to HSI
+    optsHSI.maxAnomalySize = 8;                                            % Maximum size of synthetic anomalies (length of one side of a quadrant)
     HSI                    = loadHSI(optsHSI);
 end
 
@@ -29,15 +29,15 @@ end
 
 % Calculate the anomaly score of the HSI
 %--------------------------------------------------------------------------
-if (~exist('win_size', 'var'))
-    plot_win_auc = 1;
-    win_size = findBestWindowSize(HSI, DBN, plot_win_auc); % Find best window size
+if (~exist('window', 'var'))
+    max_size   = 31;
+    window     = findBestWindowSize(HSI, DBN, max_size);   % Find best window size
 end
 
 
 % Calculate the anomaly score of the HSI
 %--------------------------------------------------------------------------
-HSI.anomaly_score = adaptiveWeights_test(HSI, DBN, win_size);
+HSI.anomaly_score = adaptiveWeights_test(HSI, DBN, window.size);
 
 
 % AUC
@@ -50,11 +50,10 @@ HSI.anomaly_score = adaptiveWeights_test(HSI, DBN, win_size);
 
 % Change from grayscale to absolute detection maps
 %--------------------------------------------------------------------------
-if (1)
-    thresh = 4;
-    HSI.anomaly_score(HSI.anomaly_score < thresh) = 0;
-    HSI.anomaly_score(HSI.anomaly_score > thresh) = 1;
-end
+bin_det_map = HSI.anomaly_score;
+th          = 12;
+bin_det_map(bin_det_map < th) = 0;
+bin_det_map(bin_det_map > th) = 1;
 
 
 % Plot results

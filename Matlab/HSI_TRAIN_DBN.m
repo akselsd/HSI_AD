@@ -1,6 +1,6 @@
 function DBN = HSI_TRAIN_DBN(HSI, N_hid)
-    opts.MaxIter             = 15;
-    opts.BatchSize           = 10;
+    opts.MaxIter             = 10;
+    opts.BatchSize           = 30;
     opts.Verbose             = 1;
     opts.StepRatio           = 0.02;
     opts.InitialMomentum     = 0.5;       % momentum for first five iterations
@@ -13,7 +13,7 @@ function DBN = HSI_TRAIN_DBN(HSI, N_hid)
     DBN   = pretrainDBN_new(DBN, HSI.M_2D, opts);
     
     opts.StepRatio           = 0.01;
-    opts.MaxIter             = 40;
+    opts.MaxIter             = 20;
     
     DBN   = trainDBN_new(DBN, HSI.M_2D, HSI.M_2D, opts);
 end
