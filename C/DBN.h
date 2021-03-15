@@ -45,7 +45,7 @@ DBN* blank_DBN(size_t bands_n, size_t mid_layer_size);
 void print_rmse(DBN* dbn, HSI* hsi);
 matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* mat_new, int* ind);
 int* randPerm(int max);
-matrix_float* mat_cat(int batchSize, matrix_float* old, matrix_float* new);
+matrix_float* mat_cat(matrix_float* old, matrix_float* new);
 DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con);
 
 #endif

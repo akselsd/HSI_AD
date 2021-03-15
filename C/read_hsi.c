@@ -19,6 +19,7 @@ HSI* read_hsi(const char* filename, size_t width, size_t height, size_t bands)
 
     if (!hsi)
     {
+        printf("==Problem reading HSI==\n");
         return NULL;
     }
 

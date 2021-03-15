@@ -1,5 +1,6 @@
 #include "read_hsi.h"
 #include "params.h"
+#include "DBN.h"
 #include "matrix_functions.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,56 +12,29 @@
 
 int main()
 {
-	printf("==Starting HAD test==\n");
-	/*
-	size_t spatial_height = HEIGHT;
-	size_t spatial_width = WIDTH;
-	size_t spectral_bands = BANDS;
-	size_t N_pixels = HEIGHT * WIDTH;
+	printf("==Start main==\n");
+
+	HSI* hsi = read_hsi(DATA, WIDTH, HEIGHT, BANDS);
+
+	DBN* dbn = initDBN(hsi->bands, MID_LAYER, 0);
+	matrix_float* V_tmp = blank_matrix_float(dbn->bands_n, 4);
+	matrix_float* V_tmp2 = blank_matrix_float(dbn->bands_n +1, 4);
+
+	printf("==HSI==\n");
+	print_mat(hsi->two_dim_matrix);
 
 	
-	HSI* hsi = read_hsi(DATA, spatial_width, spatial_height, spectral_bands);
-	HSI* tmp = blank_hsi(spatial_width, spatial_height, spectral_bands);
-	
-	if (!hsi)
-    {
-        printf("Failed to read hsi\n");
-        return -1;
-    }
+	V_tmp = mat_cpy_batch(0, 4, hsi, V_tmp, ind);
+	V_tmp2 = mat_cat(V_tmp, V_tmp2);
+	print_mat(V_tmp2);
 
-	print_hsi(hsi);
-	*/
-	matrix_float* a = blank_matrix_float(2, 4);
-	matrix_float* b = blank_matrix_float(4, 2);
-	matrix_float* c = blank_matrix_float(2, 2);
-	matrix_float* d = blank_matrix_float(2, 4);
-
-	for (size_t i = 0; i < 8; i++)
-	{
-		b->buf[i] = i;
-		a->buf[i] = i;
-	}
-	print_mat(b);
-	transpose(b);
-	print_mat(b);
-	d = mat_div_scalar(b, 4, d);
-	print_mat(d);
-	
-
-	free_matrix_float(a);
-	free_matrix_float(b);
-	free_matrix_float(c);
-	free_matrix_float(d);
-	
-
-	printf("==Ending HAD test==\n");
+	printf("==End main==\n");
 	return 0;
 }
 
 // 1. open "developer command prompt for VS 2019"
 // 2. cd to C-folder
-// 3. run "cl main.c read_hsi.c matrix_functions.c && main"
-// 4. run "main"
+// 3. run "cl main.c read_hsi.c matrix_functions.c DBN.c && main"
 
 // "clang -Wall -o runme main.c read_hsi.c matrix_functions.c" on mac
 // "./runme"

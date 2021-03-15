@@ -46,7 +46,6 @@ float mat_get(matrix_float* mat, int h_idx, int w_idx)
 
 matrix_float* blank_matrix_float(size_t width, size_t height)
 {
-    printf("==Start blank==\n");
     matrix_float* mat = malloc(sizeof(matrix_float));
 
     if (!mat)
@@ -59,7 +58,6 @@ matrix_float* blank_matrix_float(size_t width, size_t height)
     mat->width = width;
     mat->buf = calloc(height * width, sizeof(float));
     mat->transpose = 0;
-    printf("==End blank==\n");
     return mat;
 }
 
