@@ -15,26 +15,23 @@ int main()
 	printf("==Start main==\n");
 
 	HSI* hsi = read_hsi(DATA, WIDTH, HEIGHT, BANDS);
+	train_config* con = malloc(sizeof(train_config));
+	con->BatchSize     = 40;
+	con->MaxIter       = 10;
+	con->mom_final     = 0.9;
+	con->mom_init      = 0.5;
+	con->mom_init_Iter = 5;
+	con->StepRatio     = 0.01;
+	con->WeigthCost    = 0.0002; 
 
 	DBN* dbn = initDBN(hsi->bands, MID_LAYER, 0);
-	matrix_float* V_tmp = blank_matrix_float(dbn->bands_n, 4);
-	matrix_float* V_tmp2 = blank_matrix_float(dbn->bands_n +1, 4);
-
-	printf("==HSI==\n");
-	print_mat(hsi->two_dim_matrix);
-
+	dbn      = trainDBN(dbn, hsi, con);
 	
-	V_tmp = mat_cpy_batch(0, 4, hsi, V_tmp, ind);
-	V_tmp2 = mat_cat(V_tmp, V_tmp2);
-	print_mat(V_tmp2);
-
 	printf("==End main==\n");
 	return 0;
 }
 
-// 1. open "developer command prompt for VS 2019"
-// 2. cd to C-folder
-// 3. run "cl main.c read_hsi.c matrix_functions.c DBN.c && main"
 
-// "clang -Wall -o runme main.c read_hsi.c matrix_functions.c" on mac
-// "./runme"
+// Windows: "cl main.c read_hsi.c matrix_functions.c DBN.c && main"
+// MAC: "clang -Wall -o runme main.c read_hsi.c matrix_functions.c"
+// ./runme

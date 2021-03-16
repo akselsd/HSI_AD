@@ -9,11 +9,11 @@
 #include <assert.h>
 
 /*****************************************************************************/
-#define DATA "./data/test_hsi.bip"
-#define BANDS 5
-#define HEIGHT 4
-#define WIDTH 3
-#define MID_LAYER 2
+#define DATA "./data/beach1.bip"
+#define BANDS 188
+#define HEIGHT 150
+#define WIDTH 150
+#define MID_LAYER 10
 /*****************************************************************************/
 typedef struct
 {

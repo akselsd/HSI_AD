@@ -41,6 +41,19 @@ DBN* blank_DBN(size_t bands_n, size_t mid_layer_size)
     return dbn;
 }
 
+void free_DBN(DBN* dbn)
+{
+    free_matrix_float(dbn->rbm1->weights);
+    free_matrix_float(dbn->rbm2->weights);
+    free_matrix_float(dbn->rbm1->bias_h);
+    free_matrix_float(dbn->rbm2->bias_h);
+    free_matrix_float(dbn->rbm1->bias_v);
+    free_matrix_float(dbn->rbm2->bias_v);
+    free(dbn->rbm1);
+    free(dbn->rbm2);
+    free(dbn);
+}
+
 DBN* initDBN(size_t bands_n, size_t mid_layer_size, int zeros)
 {
     DBN* dbn = blank_DBN(bands_n, mid_layer_size);
@@ -63,17 +76,34 @@ DBN* initDBN(size_t bands_n, size_t mid_layer_size, int zeros)
 }
 
 
-void print_rmse(DBN* dbn, HSI* hsi){
+void print_rmse(DBN* dbn, HSI* hsi, size_t ite){
     matrix_float* H1 = blank_matrix_float(dbn->mid_layer_size, hsi->pixels);
     matrix_float* H2 = blank_matrix_float(dbn->bands_n, hsi->pixels);
 
     H1 = mat_mult(hsi->two_dim_matrix, dbn->rbm1->weights, H1);
-    H1 = mat_add(H1, dbn->rbm1->bias_h, H1);
+    H1 = mat_add_bias(H1, dbn->rbm1->bias_h, H1);
     H1 = sigmoid(H1, H1);
 
     H2 = mat_mult(H1, dbn->rbm2->weights, H2);
-    H2 = mat_add(H2, dbn->rbm2->bias_h, H2);
-    H2 = sigmoid(H2, H2);    
+    H2 = mat_add_bias(H2, dbn->rbm2->bias_h, H2);
+    H2 = sigmoid(H2, H2);
+
+    float rmse = 0;
+    float tmp1, tmp2;
+
+
+    for (size_t i = 0; i < hsi->pixels*hsi->bands; i++)
+    {
+        tmp1 = hsi->two_dim_matrix->buf[i];
+        tmp2 = H2->buf[i];
+        rmse = pow(tmp1 - tmp2, 2);
+    }
+    
+    rmse = sqrt(rmse/(hsi->pixels*hsi->bands));
+    printf("Iteration: %i -- RMSE = %f\n", ite, rmse);
+
+    free_matrix_float(H1);
+    free_matrix_float(H2);
 }
 
 
@@ -124,10 +154,26 @@ matrix_float* mat_cat(matrix_float* old, matrix_float* new)
     
 }
 
+matrix_float* mat_add_bias(matrix_float* mat, matrix_float* bias, matrix_float* result)
+{
+    if (!((result->height == mat->height) && (result->width == mat->width) && (result->width == bias->width)))
+    {
+        printf("==Wrong matrix dimensions mat_add==\n");
+        return NULL;
+    }
+
+    for (int i = 0; i < result->height; i++){
+        for (int j = 0; j < result->width; j++){
+           result->buf[i*result->width + j] = mat_get(mat, i, j) + mat_get(bias, 1, j);
+        }
+    }
+    return result;
+}
+
 
 DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
-    DBN* delta = initDBN(dbn->bands_n, dbn->mid_layer_size, 1);
-
+    
+    DBN* delta             = initDBN(dbn->bands_n, dbn->mid_layer_size, 1);
     matrix_float* H1       = blank_matrix_float(dbn->mid_layer_size, con->BatchSize);
     matrix_float* H2       = blank_matrix_float(dbn->bands_n, con->BatchSize);
     matrix_float* der1     = blank_matrix_float(dbn->bands_n, con->BatchSize);
@@ -136,7 +182,7 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
     matrix_float* deltaWB1 = blank_matrix_float(dbn->bands_n, dbn->mid_layer_size + 1);
     matrix_float* deltaW1  = blank_matrix_float(dbn->bands_n, dbn->mid_layer_size);
     matrix_float* deltaB1  = blank_matrix_float(dbn->bands_n, 1);
-    matrix_float* der2     = blank_matrix_float(con->BatchSize, dbn->mid_layer_size);
+    matrix_float* der2     = blank_matrix_float(dbn->mid_layer_size, con->BatchSize);
     matrix_float* deltaWB2 = blank_matrix_float(dbn->mid_layer_size, dbn->bands_n + 1);
     matrix_float* deltaW2  = blank_matrix_float(dbn->mid_layer_size, dbn->bands_n);
     matrix_float* deltaB2  = blank_matrix_float(dbn->mid_layer_size, 1);
@@ -144,8 +190,10 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
     float moment;
     int i, j, k, l;
 
+
     for( i = 0 ; i < con->MaxIter ; i++ )
     {
+        //Setting momentum-----------------------------------------------------------------------------------------------
         if (i < con->mom_init_Iter)
         {
             moment = con->mom_init;
@@ -153,27 +201,29 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
         {
             moment = con->mom_final;
         }
-        int* ind = randPerm(hsi->pixels);
+        //----------------------------------------------------------------------------------------------------------------
 
-        for( int j = 0 ; j < (hsi->pixels - con->BatchSize); j = j + con->BatchSize )
+        int* ind = randPerm(hsi->pixels); //Randomizing the order of the pixels
+
+        for( int j = 0 ; j < (hsi->pixels - con->BatchSize + 1); j = j + con->BatchSize )
         {
-            V_tmp = mat_cpy_batch(j, con->BatchSize, hsi, V_tmp, ind);
+            V_tmp = mat_cpy_batch(j, con->BatchSize, hsi, V_tmp, ind); //V_tmp is a matrix with a number of pixels decided by batchsize
 
             H1 = mat_mult(V_tmp, dbn->rbm1->weights, H1);
-            H1 = mat_add(H1, dbn->rbm1->bias_h, H1);
-            H1 = sigmoid(H1, H1);
+            H1 = mat_add_bias(H1, dbn->rbm1->bias_h, H1);
+            H1 = sigmoid(H1, H1);                           //H1 = sigmoid(IN*W1 + bias1)
 
             H2 = mat_mult(H1, dbn->rbm2->weights, H2);
-            H2 = mat_add(H2, dbn->rbm2->bias_h, H2);
-            H2 = sigmoid(H2, H2);
+            H2 = mat_add_bias(H2, dbn->rbm2->bias_h, H2);
+            H2 = sigmoid(H2, H2);                           //H2 = sigmoid(H1*W2 + bias2)
 
             der1 = mat_sub(H2, V_tmp, der1);
-
             in1  = mat_cat(H1, in1);
-            in1->transpose = 1;
 
+            transpose(in1);
             deltaWB1 = mat_mult(in1, der1, deltaWB1);
             deltaWB1 = mat_div_scalar(deltaWB1, con->BatchSize, deltaWB1);
+            transpose(in1);
 
             for (k = 0; k < (deltaWB1->height * deltaWB1->width); k++){
                 if (k < con->BatchSize){
@@ -183,6 +233,7 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
                 }
             }
 
+
             delta->rbm2->weights = mat_mul_scalar(delta->rbm2->weights, moment, delta->rbm2->weights);
             delta->rbm2->bias_h  = mat_mul_scalar(delta->rbm2->bias_h, moment, delta->rbm2->bias_h);            
             delta->rbm2->weights = mat_sub(delta->rbm2->weights, deltaW1, delta->rbm2->weights);
@@ -191,16 +242,18 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
             transpose(dbn->rbm2->weights);
             der2 = mat_mult(der1, dbn->rbm2->weights, der2);
             transpose(dbn->rbm2->weights);
-            
+
             for (int i = 0; i < (der2->height * der2->width); i++){
                 der2->buf[i] = H1->buf[i] * (1 - H1->buf[i]) * der2->buf[i];
             }
 
-            in2  = mat_cat(con->BatchSize, V_tmp, in2);
-            transpose(in2);
 
+            in2  = mat_cat(V_tmp, in2);
+            transpose(in2);
             deltaWB2 = mat_mult(in2, der2, deltaWB2);
+            transpose(in2);
             deltaWB2 = mat_div_scalar(deltaWB2, con->BatchSize, deltaWB2);
+
 
             for ( l = 0; l < (deltaWB2->height * deltaWB2->width); l++){
                 if (l < con->BatchSize){
@@ -209,20 +262,32 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
                     deltaW1->buf[l - con->BatchSize] = con->StepRatio * deltaWB1->buf[l];
                 }
             }
-
-            delta->rbm1->weights = mat_mul_scalar(delta->rbm2->weights, moment, delta->rbm2->weights);
-            delta->rbm1->bias_h  = mat_mul_scalar(delta->rbm2->bias_h, moment, delta->rbm2->bias_h);
-            delta->rbm1->weights = mat_sub(delta->rbm2->weights, deltaW1, delta->rbm2->weights);
-            delta->rbm1->bias_h  = mat_sub(delta->rbm2->bias_h, deltaB1, delta->rbm2->bias_h);
+            
+            delta->rbm1->weights = mat_mul_scalar(delta->rbm1->weights, moment, delta->rbm1->weights);
+            delta->rbm1->bias_h  = mat_mul_scalar(delta->rbm1->bias_h, moment, delta->rbm1->bias_h);
+            delta->rbm1->weights = mat_sub(delta->rbm1->weights, deltaW2, delta->rbm1->weights);
+            delta->rbm1->bias_h  = mat_sub(delta->rbm1->bias_h, deltaB2, delta->rbm1->bias_h);
 
             dbn->rbm1->weights = mat_add(dbn->rbm1->weights, delta->rbm1->weights, dbn->rbm1->weights);
             dbn->rbm2->weights = mat_add(dbn->rbm2->weights, delta->rbm2->weights, dbn->rbm2->weights);
             dbn->rbm1->bias_h  = mat_add(dbn->rbm1->bias_h, delta->rbm1->bias_h, dbn->rbm1->bias_h);
-            dbn->rbm2->weights = mat_add(dbn->rbm2->bias_h, delta->rbm2->bias_h, dbn->rbm2->bias_h);
+            dbn->rbm2->bias_h  = mat_add(dbn->rbm2->bias_h, delta->rbm2->bias_h, dbn->rbm2->bias_h);
         }
+        print_rmse(dbn, hsi, i);
     }
+    free_matrix_float(H1);
+    free_matrix_float(H2);
+    free_matrix_float(der1);
+    free_matrix_float(der2);
+    free_matrix_float(V_tmp);
+    free_matrix_float(in1);
+    free_matrix_float(deltaW1);
+    free_matrix_float(deltaWB1);
+    free_matrix_float(deltaB1);
+    free_matrix_float(deltaW2);
+    free_matrix_float(deltaWB2);
+    free_matrix_float(deltaB2);
+    free_matrix_float(in2);
+    free_DBN(delta);
+    return dbn;
 }
-
-
-
-

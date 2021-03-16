@@ -39,13 +39,15 @@ typedef struct
     RBM* rbm2;
 } DBN;
 
-DBN* initDBN(size_t bands_n, size_t mid_layer_size, int zeros);
 RBM* blank_rbm(size_t visual_n, size_t hidden_n);
+void free_DBN(DBN* dbn);
 DBN* blank_DBN(size_t bands_n, size_t mid_layer_size);
-void print_rmse(DBN* dbn, HSI* hsi);
+DBN* initDBN(size_t bands_n, size_t mid_layer_size, int zeros);
+void print_rmse(DBN* dbn, HSI* hsi, size_t ite);
 matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* mat_new, int* ind);
 int* randPerm(int max);
 matrix_float* mat_cat(matrix_float* old, matrix_float* new);
+matrix_float* mat_add_bias(matrix_float* mat, matrix_float* bias, matrix_float* result);
 DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con);
 
 #endif

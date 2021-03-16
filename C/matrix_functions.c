@@ -76,7 +76,6 @@ void free_matrix_float(matrix_float* f)
 /************************************************************************************************/
 void transpose(matrix_float* mat)
 {
-    printf("==Transpose==\n");
     mat->transpose = mat->transpose^1;
     size_t height = mat->height;
     mat->height = mat->width;
@@ -90,10 +89,9 @@ void transpose(matrix_float* mat)
 
 matrix_float* mat_mult(matrix_float* first, matrix_float* second, matrix_float* result)
 {
-    printf("==mat_mult==\n");
-
-    if (!((result->height == first->height) && (result->width == second->width))){
-        printf("==Wrong matrix dimensions==\n");
+    if (!((result->height == first->height) && (result->width == second->width) && (first->width == second->height)))
+    {
+        printf("==Wrong matrix dimensions mat_mult==\n");
         return NULL;
     }
 
@@ -114,10 +112,9 @@ matrix_float* mat_mult(matrix_float* first, matrix_float* second, matrix_float* 
 
 matrix_float* mat_add(matrix_float* first, matrix_float* second, matrix_float* result)
 {
-    printf("==mat_add==\n");
-
-    if (!((result->height == first->height) && (result->width == second->width))){
-        printf("==Wrong matrix dimensions==\n");
+    if (!((result->height == first->height) && (result->width == first->width) && (result->height == second->height) && (result->width == second->width)))
+    {
+        printf("==Wrong matrix dimensions mat_add==\n");
         return NULL;
     }
 
@@ -135,7 +132,11 @@ matrix_float* mat_add(matrix_float* first, matrix_float* second, matrix_float* r
 
 matrix_float* mat_div_scalar(matrix_float* in, float scalar, matrix_float* result)
 {
-    printf("==mat_div_scalar==\n");
+    if (!((result->height == in->height) && (result->width == in->width)))
+    {
+        printf("==Wrong matrix dimensions mat_div_scalar==\n");
+        return NULL;
+    }
 
     for (int i = 0; i < result->height; i++){
         for (int j = 0; j < result->width; j++){
@@ -152,11 +153,14 @@ matrix_float* mat_div_scalar(matrix_float* in, float scalar, matrix_float* resul
 
 matrix_float* mat_mul_scalar(matrix_float* in, float scalar, matrix_float* result)
 {
-    printf("==mat_add==\n");
+    if (!((result->height == in->height) && (result->width == in->width)))
+    {
+        printf("==Wrong matrix dimensions mat_mul_scalar==\n");
+        return NULL;
+    }
 
     for (int i = 0; i < (result->height * result->width); i++){
         result->buf[i] = in->buf[i] * scalar;
-        printf("%i \n ", i);
     }
     return result;
 }
@@ -168,16 +172,14 @@ matrix_float* mat_mul_scalar(matrix_float* in, float scalar, matrix_float* resul
 
 matrix_float* mat_sub(matrix_float* first, matrix_float* second, matrix_float* result)
 {
-    printf("==mat_add==\n");
-
-    if (!((result->height == first->height) && (result->width == second->width))){
-        printf("==Wrong matrix dimensions==\n");
+    if (!((result->height == first->height) && (result->width == first->width) && (result->height == second->height) && (result->width == second->width)))
+    {
+        printf("==Wrong matrix dimensions mat_sub==\n");
         return NULL;
     }
 
     for (int i = 0; i < (result->height * result->width); i++){
         result->buf[i] = first->buf[i] - second->buf[i];
-        printf("%i \n ", i);
     }
     return result;
 }
@@ -189,14 +191,17 @@ matrix_float* mat_sub(matrix_float* first, matrix_float* second, matrix_float* r
 
 matrix_float* sigmoid(matrix_float* in, matrix_float* result)
 {
-    printf("==sigmoid==\n");
-    print_mat(in);
+    if (!((result->height == in->height) && (result->width == in->width)))
+    {
+        printf("==Wrong matrix dimensions sigmoid==\n");
+        return NULL;
+    }
+
     for (int i = 0; i < result->height; i++){
         for (int j = 0; j < result->width; j++){
             result->buf[i*result->width + j] = 1/(1 + expf(- mat_get(in, i, j)));
         }
     }
-    print_mat(result);
     return result;
 }
 

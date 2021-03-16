@@ -14,7 +14,6 @@ static int read_binary(const char* filename, float* buf, size_t num_elements);
 /*****************************************************************************/
 HSI* read_hsi(const char* filename, size_t width, size_t height, size_t bands)
 {
-	printf("==read_hsi==\n");
     HSI* hsi = blank_hsi(width, height, bands);
 
     if (!hsi)
@@ -34,7 +33,6 @@ HSI* read_hsi(const char* filename, size_t width, size_t height, size_t bands)
 /*****************************************************************************/
 HSI* blank_hsi(size_t width, size_t height, size_t bands)
 {
-	printf("==blank_hsi==\n");
     HSI* hsi = malloc(sizeof(HSI));
 
     if (!hsi)
@@ -58,7 +56,6 @@ HSI* blank_hsi(size_t width, size_t height, size_t bands)
 /*****************************************************************************/
 static int read_binary(const char* filename, float* buf_float, size_t num_elements)
 {
-	printf("==read_binary==\n");
     FILE* fp = fopen(filename, "rb");
     if (!fp)
     {
@@ -85,7 +82,6 @@ static int read_binary(const char* filename, float* buf_float, size_t num_elemen
 /*****************************************************************************/
 size_t get_file_size(const char* filename)
 {
-	printf("==get_file_size==\n");
     FILE* fp = fopen(filename, "rb");
 
     if (!fp)
