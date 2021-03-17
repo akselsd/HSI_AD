@@ -6,7 +6,7 @@
 #include <math.h>
 #include "DBN.h"
 
-
+/***********************************************************************************************BLANK_RBM*/
 RBM* blank_rbm(size_t visual_n, size_t hidden_n)
 {
     RBM* rbm = malloc(sizeof(RBM));
@@ -23,7 +23,7 @@ RBM* blank_rbm(size_t visual_n, size_t hidden_n)
     rbm->weights = blank_matrix_float(hidden_n, visual_n);
     return rbm;
 }
-
+/***********************************************************************************************BLANK_DBN*/
 DBN* blank_DBN(size_t bands_n, size_t mid_layer_size)
 {
     DBN* dbn = malloc(sizeof(DBN));
@@ -40,7 +40,7 @@ DBN* blank_DBN(size_t bands_n, size_t mid_layer_size)
     dbn->mid_layer_size = mid_layer_size;
     return dbn;
 }
-
+/***********************************************************************************************FREE_DBN*/
 void free_DBN(DBN* dbn)
 {
     free_matrix_float(dbn->rbm1->weights);
@@ -53,7 +53,7 @@ void free_DBN(DBN* dbn)
     free(dbn->rbm2);
     free(dbn);
 }
-
+/***********************************************************************************************INIT_DBN*/
 DBN* initDBN(size_t bands_n, size_t mid_layer_size, int zeros)
 {
     DBN* dbn = blank_DBN(bands_n, mid_layer_size);
@@ -74,8 +74,7 @@ DBN* initDBN(size_t bands_n, size_t mid_layer_size, int zeros)
     }
     return dbn;
 }
-
-
+/***********************************************************************************************PRINT_RMSE*/
 void print_rmse(DBN* dbn, HSI* hsi, size_t ite){
     matrix_float* H1 = blank_matrix_float(dbn->mid_layer_size, hsi->pixels);
     matrix_float* H2 = blank_matrix_float(dbn->bands_n, hsi->pixels);
@@ -83,10 +82,15 @@ void print_rmse(DBN* dbn, HSI* hsi, size_t ite){
     H1 = mat_mult(hsi->two_dim_matrix, dbn->rbm1->weights, H1);
     H1 = mat_add_bias(H1, dbn->rbm1->bias_h, H1);
     H1 = sigmoid(H1, H1);
+    print_mat(H1);
+
+    
 
     H2 = mat_mult(H1, dbn->rbm2->weights, H2);
     H2 = mat_add_bias(H2, dbn->rbm2->bias_h, H2);
     H2 = sigmoid(H2, H2);
+    print_mat(H2);
+    
 
     float rmse = 0;
     float tmp1, tmp2;
@@ -96,17 +100,18 @@ void print_rmse(DBN* dbn, HSI* hsi, size_t ite){
     {
         tmp1 = hsi->two_dim_matrix->buf[i];
         tmp2 = H2->buf[i];
-        rmse = pow(tmp1 - tmp2, 2);
+        tmp1 = tmp2 - tmp1;
+        rmse = pow(tmp1, 2);
     }
-    
+    printf("rmse: %f\n", rmse);
     rmse = sqrt(rmse/(hsi->pixels*hsi->bands));
+    
     printf("Iteration: %i -- RMSE = %f\n", ite, rmse);
 
     free_matrix_float(H1);
     free_matrix_float(H2);
 }
-
-
+/***********************************************************************************************MAT_CPY_BATCH*/
 matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* mat_new, int* ind)
 {
     for (size_t i = start_i; i < (start_i + batchSize); i++)
@@ -118,8 +123,7 @@ matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* 
     }
     return mat_new;
 }
-
-
+/***********************************************************************************************RAND_PERM*/
 int* randPerm(int max){
     int* perm = malloc(max*sizeof(int));
     for (int i = 0; i < max; i++) perm[i] = i;
@@ -132,10 +136,7 @@ int* randPerm(int max){
     }
     return perm;
 }
-
-
-
-
+/***********************************************************************************************MAT_CAT*/
 matrix_float* mat_cat(matrix_float* old, matrix_float* new)
 {
     for (size_t i = 0; i < new->height; i++)
@@ -153,7 +154,7 @@ matrix_float* mat_cat(matrix_float* old, matrix_float* new)
     return new;
     
 }
-
+/***********************************************************************************************MAT_ADD_BIAS*/
 matrix_float* mat_add_bias(matrix_float* mat, matrix_float* bias, matrix_float* result)
 {
     if (!((result->height == mat->height) && (result->width == mat->width) && (result->width == bias->width)))
@@ -164,13 +165,12 @@ matrix_float* mat_add_bias(matrix_float* mat, matrix_float* bias, matrix_float* 
 
     for (int i = 0; i < result->height; i++){
         for (int j = 0; j < result->width; j++){
-           result->buf[i*result->width + j] = mat_get(mat, i, j) + mat_get(bias, 1, j);
+           result->buf[i*result->width + j] = mat_get(mat, i, j) + mat_get(bias, 0, j);
         }
     }
     return result;
 }
-
-
+/***********************************************************************************************TRAIN_DBN*/
 DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
     
     DBN* delta             = initDBN(dbn->bands_n, dbn->mid_layer_size, 1);
@@ -291,3 +291,4 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con){
     free_DBN(delta);
     return dbn;
 }
+/************************************************************************************************/
