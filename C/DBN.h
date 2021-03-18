@@ -48,6 +48,6 @@ matrix_float* mat_cpy_batch(int start_i, int batchSize, HSI* hsi, matrix_float* 
 int* randPerm(int max);
 matrix_float* mat_cat(matrix_float* old, matrix_float* new);
 matrix_float* mat_add_bias(matrix_float* mat, matrix_float* bias, matrix_float* result);
-DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con);
+DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con, int debug);
 
 #endif

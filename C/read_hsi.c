@@ -9,8 +9,8 @@
 #include <assert.h>
 
 
+static int read_binary_float(const char* filename, float* buf, size_t num_elements);
 static int read_binary(const char* filename, float* buf, size_t num_elements);
-
 /*****************************************************************************/
 HSI* read_hsi(const char* filename, size_t width, size_t height, size_t bands)
 {
@@ -23,9 +23,9 @@ HSI* read_hsi(const char* filename, size_t width, size_t height, size_t bands)
     }
 
     size_t sz = get_file_size(filename);
-    assert(sz == width * height * bands * sizeof(uint16_t));
+    assert(sz == width * height * bands * sizeof(float));
 
-    read_binary(filename, hsi->two_dim_matrix->buf, width * height * bands);
+    read_binary_float(filename, hsi->two_dim_matrix->buf, width * height * bands);
 
     return hsi;
     
@@ -78,6 +78,26 @@ static int read_binary(const char* filename, float* buf_float, size_t num_elemen
 
     return 0;
 }
+/*****************************************************************************/
+static int read_binary_float(const char* filename, float* buf_float, size_t num_elements)
+{
+    FILE* fp = fopen(filename, "rb");
+    if (!fp)
+    {
+        printf("Could not open file \n");
+        return -1;
+    }
+    
+    size_t unit_size = sizeof(float);
+    int unused = fread(buf_float, unit_size, num_elements, fp);
+    unused++;
+
+    fclose(fp);
+
+    return 0;
+}
+
+
 
 /*****************************************************************************/
 size_t get_file_size(const char* filename)

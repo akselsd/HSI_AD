@@ -13,10 +13,11 @@
 int main()
 {
 	printf("==Start main==\n");
+	int debug = 1;
 
 	HSI* hsi = read_hsi(DATA, WIDTH, HEIGHT, BANDS);
 	train_config* con = malloc(sizeof(train_config));
-	con->BatchSize     = 10;
+	con->BatchSize     = 4;
 	con->MaxIter       = 2;
 	con->mom_final     = 0.9;
 	con->mom_init      = 0.5;
@@ -25,10 +26,8 @@ int main()
 	con->WeigthCost    = 0.0002; 
 
 	DBN* dbn = initDBN(hsi->bands, MID_LAYER, 0);
-	print_rmse(dbn, hsi, 1);
+	dbn      = trainDBN(dbn, hsi, con, debug);
 
-	//dbn      = trainDBN(dbn, hsi, con);
-	
 	printf("==End main==\n");
 	return 0;
 }
