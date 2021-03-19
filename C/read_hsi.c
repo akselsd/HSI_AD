@@ -133,3 +133,7 @@ void print_hsi(const HSI* hsi)
     }
 }
 /*****************************************************************************/
+
+void write_results(matrix_float* R){
+    
+}

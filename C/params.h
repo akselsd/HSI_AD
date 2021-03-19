@@ -8,7 +8,7 @@
 #include <string.h>
 #include <assert.h>
 
-/*****************************************************************************/
+/****************************************************************************
 #define DATA "./data/beach2_small_float.bip"
 #define BANDS 5
 #define HEIGHT 3
@@ -21,7 +21,7 @@
 #define HEIGHT 150
 #define WIDTH 150
 #define MID_LAYER 13
-***************************************************************************
+****************************************************************************/
 #define DATA "./data/beach2_float.bip"
 #define BANDS 21
 #define HEIGHT 100

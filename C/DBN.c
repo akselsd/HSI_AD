@@ -64,8 +64,8 @@ DBN* initDBN(size_t bands_n, size_t mid_layer_size, int zeros)
         for( int j = 0 ; j < mid_layer_size ; j++ ){
             if (!zeros)
             {
-                dbn->rbm1->weights->buf[i*mid_layer_size + j] = 0.1*((float)rand()/(float)RAND_MAX);
-                dbn->rbm2->weights->buf[i*mid_layer_size + j] = 0.1*((float)rand()/(float)RAND_MAX);
+                dbn->rbm1->weights->buf[i*mid_layer_size + j] = 0.1*((float)rand()/(float)RAND_MAX) -0.05;
+                dbn->rbm2->weights->buf[i*mid_layer_size + j] = 0.1*((float)rand()/(float)RAND_MAX) - 0.05;
             } else{
                 dbn->rbm1->weights->buf[i*mid_layer_size + j] = 0.0;
                 dbn->rbm2->weights->buf[i*mid_layer_size + j] = 0.0;
@@ -204,7 +204,7 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con, int debug){
 
 
             if (debug){
-            printf("Batch: %i |=====| V_tmp: W = %i H = %i\n", j/con->BatchSize, V_tmp->width, V_tmp->height);
+            printf("Batch: %i\n", j/con->BatchSize);
             }
 
 
@@ -254,10 +254,10 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con, int debug){
 
 
             for ( l = 0; l < (deltaWB2->height * deltaWB2->width); l++){
-                if (l < con->BatchSize){
-                    deltaB1->buf[l] = con->StepRatio * deltaWB1->buf[l];
+                if (l < dbn->mid_layer_size){
+                    deltaB2->buf[l] = con->StepRatio * deltaWB2->buf[l];
                 }else{
-                    deltaW1->buf[l - con->BatchSize] = con->StepRatio * deltaWB1->buf[l];
+                    deltaW2->buf[l - dbn->mid_layer_size] = con->StepRatio * deltaWB2->buf[l];
                 }
             }
             
@@ -266,10 +266,51 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con, int debug){
             delta->rbm1->weights = mat_sub(delta->rbm1->weights, deltaW2, delta->rbm1->weights);
             delta->rbm1->bias_h  = mat_sub(delta->rbm1->bias_h, deltaB2, delta->rbm1->bias_h);
 
+            if (debug && (i == 0) && (j == 0)){
+                printf("W1\n");
+                print_mat(dbn->rbm1->weights);
+
+                printf("W2\n");
+                print_mat(dbn->rbm2->weights);
+
+                printf("dWB1\n");
+                print_mat(deltaWB1);
+
+                printf("dW1\n");
+                print_mat(deltaW1);
+
+                printf("dB1\n");
+                print_mat(deltaB1);
+
+                printf("dWB2\n");
+                print_mat(deltaWB2);
+
+                printf("dW2\n");
+                print_mat(deltaW2);
+
+                printf("dB2\n");
+                print_mat(deltaB2);
+                
+            }
+
             dbn->rbm1->weights = mat_add(dbn->rbm1->weights, delta->rbm1->weights, dbn->rbm1->weights);
             dbn->rbm2->weights = mat_add(dbn->rbm2->weights, delta->rbm2->weights, dbn->rbm2->weights);
             dbn->rbm1->bias_h  = mat_add(dbn->rbm1->bias_h, delta->rbm1->bias_h, dbn->rbm1->bias_h);
             dbn->rbm2->bias_h  = mat_add(dbn->rbm2->bias_h, delta->rbm2->bias_h, dbn->rbm2->bias_h);
+
+             if (debug && (i == 0) && (j == 0)){
+                printf("W1 after\n");
+                print_mat(dbn->rbm1->weights);
+
+                printf("W2 after\n");
+                print_mat(dbn->rbm2->weights);
+
+                printf("b1\n");
+                print_mat(dbn->rbm1->bias_h);
+
+                printf("b2\n");
+                print_mat(dbn->rbm2->bias_h);
+            }
         }
         print_rmse(dbn, hsi, i);
     }
@@ -290,3 +331,32 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con, int debug){
     return dbn;
 }
 /************************************************************************************************/
+matrix_float* encodeDecode(DBN* dbn, HSI* hsi){
+    matrix_float* H1 = blank_matrix_float(dbn->mid_layer_size, hsi->pixels);
+    matrix_float* H2 = blank_matrix_float(dbn->bands_n, hsi->pixels);
+    matrix_float* R  = blank_matrix_float(1, hsi->pixels);
+
+    H1 = mat_mult(hsi->two_dim_matrix, dbn->rbm1->weights, H1);
+    H1 = mat_add_bias(H1, dbn->rbm1->bias_h, H1);
+    H1 = sigmoid(H1, H1);    
+
+    H2 = mat_mult(H1, dbn->rbm2->weights, H2);
+    H2 = mat_add_bias(H2, dbn->rbm2->bias_h, H2);
+    H2 = sigmoid(H2, H2);
+
+    float sum;
+    H2 = mat_sub(hsi->two_dim_matrix, H2);
+    for (size_t i = 0; i < hsi->pixels; i++)
+    {
+        sum = 0;
+        for (size_t j = 0; j < dbn->bands_n; j++)
+        {
+            sum += pow(H2->buf[i*dbn->bands_n], 2);
+        }
+        
+        R->buf[i] = sqrt(sum);
+    }
+    
+
+
+}
