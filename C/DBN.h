@@ -49,5 +49,6 @@ int* randPerm(int max);
 matrix_float* mat_cat(matrix_float* old, matrix_float* new);
 matrix_float* mat_add_bias(matrix_float* mat, matrix_float* bias, matrix_float* result);
 DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con, int debug);
+matrix_float* encodeDecode(DBN* dbn, HSI* hsi);
 
 #endif

@@ -19,7 +19,7 @@ int main()
 	train_config* con = malloc(sizeof(train_config));
 	//print_mat(hsi->two_dim_matrix);
 	con->BatchSize     = 50;
-	con->MaxIter       = 150;
+	con->MaxIter       = 35;
 	con->mom_final     = 0.9;
 	con->mom_init      = 0.5;
 	con->mom_init_Iter = 5;
@@ -28,8 +28,13 @@ int main()
 
 	DBN* dbn = initDBN(hsi->bands, MID_LAYER, 0);
 	dbn      = trainDBN(dbn, hsi, con, debug);
-
+	matrix_float* R = encodeDecode(dbn, hsi);
+	write_results(R);
 	
+	free_DBN(dbn);
+	free_hsi(hsi);
+	free_matrix_float(R);
+	free(con);
 
 	printf("==End main==\n");
 	return 0;

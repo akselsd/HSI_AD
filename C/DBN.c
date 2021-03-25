@@ -191,11 +191,6 @@ DBN* trainDBN(DBN* dbn, HSI* hsi, train_config* con, int debug){
         }
         //----------------------------------------------------------------------------------------------------------------
 
-        if (debug){
-            printf("Iteration: %i |=====| Momen: %f \n", i, moment);
-        }
-
-
         int* ind = randPerm(hsi->pixels); //Randomizing the order of the pixels
 
         for( int j = 0 ; j < (hsi->pixels - con->BatchSize + 1); j = j + con->BatchSize )
@@ -345,18 +340,16 @@ matrix_float* encodeDecode(DBN* dbn, HSI* hsi){
     H2 = sigmoid(H2, H2);
 
     float sum;
-    H2 = mat_sub(hsi->two_dim_matrix, H2);
+    H2 = mat_sub(hsi->two_dim_matrix, H2, H2);
     for (size_t i = 0; i < hsi->pixels; i++)
     {
         sum = 0;
         for (size_t j = 0; j < dbn->bands_n; j++)
         {
-            sum += pow(H2->buf[i*dbn->bands_n], 2);
+            sum += pow(H2->buf[i*dbn->bands_n + j], 2);
         }
         
         R->buf[i] = sqrt(sum);
     }
-    
-
-
+    return R;
 }

@@ -135,5 +135,8 @@ void print_hsi(const HSI* hsi)
 /*****************************************************************************/
 
 void write_results(matrix_float* R){
-    
+    FILE *write_ptr;
+    write_ptr = fopen("test.bin","wb");  // w for write, b for binary
+    fwrite(R->buf, R->height*R->width*(sizeof(float)) ,1 , write_ptr);
+    fclose(write_ptr);
 }

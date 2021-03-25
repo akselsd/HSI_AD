@@ -22,10 +22,10 @@
 #define WIDTH 150
 #define MID_LAYER 13
 ****************************************************************************/
-#define DATA "./data/beach2_float.bip"
-#define BANDS 21
-#define HEIGHT 100
-#define WIDTH 100
+#define DATA "./data/beach1_full.bip"
+#define BANDS 188
+#define HEIGHT 150
+#define WIDTH 150
 #define MID_LAYER 13
 /****************************************************************************/
 typedef struct
