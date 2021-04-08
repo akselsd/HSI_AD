@@ -10,7 +10,6 @@ function DBN = trainDBN_new( DBN, IN, OUT, opts)
         deltaDbn.rbm{n}.b = zeros(size(DBN.rbm{n}.b));
     end
 
-
     for iter=1:opts.MaxIter
         
         % Set momentum
@@ -61,8 +60,7 @@ function DBN = trainDBN_new( DBN, IN, OUT, opts)
             for n = 1 : N_rbm            
                 DBN.rbm{n}.W = DBN.rbm{n}.W + deltaDbn.rbm{n}.W;
                 DBN.rbm{n}.b = DBN.rbm{n}.b + deltaDbn.rbm{n}.b;  
-            end
-
+            end      
         end
         
         if( opts.Verbose )

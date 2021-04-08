@@ -1,4 +1,4 @@
-function anomaly_score = adaptiveWeights_test(HSI, DBN, win)
+function anomaly_score = adaptiveWeights_new(HSI, DBN, win)
     N_n           = (win + 2)^2 - win^2; % Nr of neighbours
     mean_r        = mean(HSI.R);
     std_r         = std(HSI.R);
@@ -14,9 +14,8 @@ function anomaly_score = adaptiveWeights_test(HSI, DBN, win)
             Rn    = findNeighbours(idx, HSI.h, HSI.R, win); %Reconstruction error neighbours
             Cn    = findNeighbours(idx, HSI.h, HSI.C, win); %codelayer neighbours
             wt    = HSI.R(idx)./Rn';% find weights
-            dist  = sum((sqrt((Cn - HSI.C(idx, :)).^2)), 2);    
-            
             wt((Rn' - mean_r) > 2*std_r) = Pf*wt((Rn' - mean_r) > 2*std_r);
+            dist  = sum((sqrt((Cn - HSI.C(idx, :)).^2)), 2);    
             anomaly_score(idx) = (1/length(dist(dist > 0)))*(wt*dist);% calc anomaly score
 
         end

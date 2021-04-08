@@ -1,6 +1,6 @@
-function [auc, fpr, tpr] = calcAUC(an_score, an_map, k)
+function res = calcAUC(an_score, an_map)
 
-
+    k = 1000;
 	[m, n]   = size(an_map);
 	an_score = reshape( an_score, m, n);
     
@@ -36,14 +36,9 @@ function [auc, fpr, tpr] = calcAUC(an_score, an_map, k)
         fpr(i) = fp;    
         
     end	
-            
-    %ROC 
     tpr= tpr./positives;
     fpr= fpr./negatives;
-    
-    tpr = tpr(end:-1:1);
-    fpr = fpr(end:-1:1);
-    
-    
-    auc = trapz(fpr,tpr);
+    res.tpr = tpr(end:-1:1);
+    res.fpr = fpr(end:-1:1);
+    res.auc = trapz(res.fpr,res.tpr);
 end
